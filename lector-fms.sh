@@ -158,7 +158,7 @@ interactive_dossier_view() {
     echo "$dossier"
 
     while :; do
-        read -n 1 -p "Нажмите 'a' (добавить), 'd' (удалить), 'q' (выход): " choice
+        read -n 1 -p "Нажмите 'a' (добавить), 'd' (удалить), 'v' (просмотр), 'q' (выход): " choice
         echo
         case $choice in
             a)
@@ -180,6 +180,12 @@ interactive_dossier_view() {
                 else
                     echo "Удаление отменено."
                 fi
+                ;;
+			v)
+                # Вывод досье на экран
+				dossier=$(awk -v name="$last_name" '$0 ~ name {getline; print}' "$dossier_file")
+                echo "Текущее досье студента $full_name:"
+                echo "$dossier"
                 ;;
             q)
                 echo "Выход из интерактивного режима досье."
@@ -219,6 +225,13 @@ if [[ $SHOW_TOP_BY_YEAR -eq 1 ]]; then
     # Если указан ключ -t, выводим лучших студентов по годам сдачи тестов
     top_students_by_year
 elif [[ -n "$GROUP" ]]; then
+	# Проверяем, существует ли информация по указанной группе
+    group_files=$(find . -type f -name "${GROUP}-*")
+    if [[ -z "$group_files" ]]; then
+        echo "Ошибка: Для группы '$GROUP' данные не найдены. Проверьте правильность ввода."
+        exit 1
+    fi
+
     # Если указана группа, предлагаем выбор действия
     echo "Выберите действие для группы $GROUP:"
     echo "1 - Вывести имена студентов с максимальным количеством троек, четверок и пятерок"
